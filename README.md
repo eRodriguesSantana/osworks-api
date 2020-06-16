@@ -1,2 +1,4 @@
-# osworks-api
-Projeto de ordem de serviço utilizando Spring Rest
+# API REST de Ordem de Serviço
+
+Projeto feito com Spring Rest
+
