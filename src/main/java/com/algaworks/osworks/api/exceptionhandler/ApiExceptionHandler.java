@@ -1,6 +1,6 @@
 package com.algaworks.osworks.api.exceptionhandler;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.algaworks.osworks.domain.exception.EntidadeNaoEncontradaException;
 import com.algaworks.osworks.domain.exception.NegocioException;
 
 @ControllerAdvice //indica que é um componente do spring onde será tratada as exceptions da classe ClienteController 
@@ -30,6 +31,22 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{
 	private MessageSource messageSource;
 	
 	//indica que se uma classe Controller lançar uma determinada excessão, esse metodo tem um tratamento especifico pra ela
+	@ExceptionHandler(EntidadeNaoEncontradaException.class)
+	public ResponseEntity<Object> handleEntidadeNaoEncontrada(NegocioException ex, WebRequest request) {
+		//WebRequest é uma interface que indica uma requisição da web
+		
+		var status = HttpStatus.NOT_FOUND;
+		
+		var problema = new Problema();
+		problema.setStatus(status.value());
+		problema.setTitulo(ex.getMessage());
+		problema.setDataHora(OffsetDateTime.now());
+		
+		//retorna status 404 - Not Found
+		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
+	}
+	
+	//indica que se uma classe Controller lançar uma determinada excessão, esse metodo tem um tratamento especifico pra ela
 	@ExceptionHandler(NegocioException.class)
 	public ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request) {
 		//WebRequest é uma interface que indica uma requisição da web
@@ -39,7 +56,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{
 		var problema = new Problema();
 		problema.setStatus(status.value());
 		problema.setTitulo(ex.getMessage());
-		problema.setDataHora(LocalDateTime.now());
+		problema.setDataHora(OffsetDateTime.now());
 		
 		//retorna status 400 - Bad Request
 		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
@@ -72,7 +89,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{
 		problema.setTitulo("Um ou mais campos estão inválidos. Faça o preenchimento correto e tente novamente");
 		
 		//pega a data e hora atual em que ocorreu o erro e atribui a variavel dataHora da classe Problema
-		problema.setDataHora(LocalDateTime.now());
+		problema.setDataHora(OffsetDateTime.now());
 		
 		//atribui valor nas variaveis do metodo estatico Campos da classe Problema que estivem em desacordo de preenchimento
 		problema.setCampos(campos);
